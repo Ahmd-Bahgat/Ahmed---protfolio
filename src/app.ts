@@ -16,4 +16,4 @@ connectDB()
 app.use('/api/contact', contactRouter)
 app.use(errorHandler)
 
-app.listen(PORT, ()=>console.log(`server running on http://localhost:${PORT}`))
+app.listen(PORT, '0.0.0.0' ,()=>console.log(`server running on port ${PORT}`))
