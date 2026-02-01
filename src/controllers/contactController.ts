@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { ContactModel, zContactShcema } from "../models/contactModel";
+import { ContactModel, zContactSchema } from "../models/contactModel";
 import { sendMail } from "../utils/sentMail";
 
 export const submitContact = async (
@@ -8,7 +8,7 @@ export const submitContact = async (
   next: NextFunction,
 ) => {
   try {
-    const validation = zContactShcema.safeParse(req.body);
+    const validation = zContactSchema.safeParse(req.body);
     if (!validation.success) {
       return res.status(400).json({
         message: "validation error",
@@ -19,10 +19,17 @@ export const submitContact = async (
     const detail = validation.data;
     const data = await ContactModel.create(detail);
 
-    await sendMail(
-      process.env.EMAIL_USER as string,
-      "📩 New Contact Message - Portfolio",
-      `
+    if (!process.env.EMAIL_USER) {
+      throw new Error("EMAIL_USER is not defined");
+    }
+    res.status(201).json({
+      message: "Message Sent Successfully",
+    });
+    Promise.all([
+      sendMail(
+        process.env.EMAIL_USER as string,
+        "📩 New Contact Message - Ahmed",
+        `
   <div style="font-family: Arial, sans-serif; background:#f4f6f8; padding:20px">
     <div style="max-width:600px; margin:auto; background:#ffffff; padding:20px; border-radius:8px">
       
@@ -41,24 +48,23 @@ export const submitContact = async (
 
       <hr />
       <p style="font-size:12px; color:#777">
-        This message was sent from your portfolio contact form.
+        This message was sent from your Ahmed Bahgat contact form.
       </p>
     </div>
   </div>
   `,
-    );
-
-    await sendMail(
-      data.email,
-      "Thanks for contacting me 👋",
-      `
+      ),
+      sendMail(
+        data.email,
+        "Thanks for contacting me 👋",
+        `
   <div style="font-family: Arial, sans-serif; background:#f4f6f8; padding:20px">
     <div style="max-width:600px; margin:auto; background:#ffffff; padding:20px; border-radius:8px">
 
       <h2 style="color:#333;">Hello ${data.name},</h2>
 
       <p>
-        Thank you for reaching out to me through my portfolio website.
+        Thank you for reaching out to me through my Ahmed Bahgat website.
         I’ve received your message and I appreciate your interest.
       </p>
 
@@ -80,12 +86,8 @@ export const submitContact = async (
     </div>
   </div>
   `,
-    );
-
-    res.status(201).json({
-      message: "message send successfully",
-      data: data,
-    });
+      ),
+    ]);
   } catch (error: any) {
     next(error);
   }

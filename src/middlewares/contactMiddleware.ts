@@ -1,7 +1,7 @@
 import rateLimit from "express-rate-limit";
 
 export const contactLimiter = rateLimit({
-  windowMs: 60 * 60 * 1000,
+  windowMs: 60 * 60 * 1000 *24,
   limit: 5,
   message: {
     success: false,
